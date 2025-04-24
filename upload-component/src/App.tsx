@@ -1,5 +1,5 @@
 import React from "react";
-import { UploadOutlined } from "@ant-design/icons";
+import { InboxOutlined, UploadOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import Upload, { UploadProps } from "./Upload";
 
@@ -18,7 +18,7 @@ const props: UploadProps = {
   onError(err) {
     console.log("onError", err);
   },
-  onProgress(percentage, file) {
+  onProgress(percentage) {
     console.log("onProgress", percentage);
   },
   onChange(file) {
@@ -27,8 +27,11 @@ const props: UploadProps = {
 };
 
 const App: React.FC = () => (
-  <Upload {...props}>
-    <Button icon={<UploadOutlined />}>Click to Upload</Button>
+  <Upload {...props} drag>
+    <p>
+      <InboxOutlined style={{ fontSize: '50px' }} />
+    </p>
+    <p>点击或者拖拽文件到此处</p>
   </Upload>
 );
 

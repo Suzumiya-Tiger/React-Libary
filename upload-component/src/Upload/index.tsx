@@ -1,7 +1,9 @@
-import { FC, useRef, ChangeEvent, PropsWithChildren } from "react";
+import { FC, useRef, ChangeEvent, PropsWithChildren, useState } from "react";
 import axios from "axios";
 
 import "./index.scss";
+import UploadList, { UploadFile } from "./UploadList";
+import Dragger from "./Dragger";
 
 export interface UploadProps extends PropsWithChildren {
   action: string;
@@ -17,6 +19,8 @@ export interface UploadProps extends PropsWithChildren {
   onProgress?: (percentage: number, file: File) => void;
   onSuccess?: (data: any, file: File) => void;
   onError?: (err: Error, file: File) => void;
+  onRemove?: (file: UploadFile) => void;
+  drag: boolean
 }
 
 const Upload: FC<UploadProps> = props => {
@@ -34,6 +38,8 @@ const Upload: FC<UploadProps> = props => {
     onSuccess,
     onError,
     onChange,
+    onRemove,
+    drag
   } = props;
 
   const fileInput = useRef<HTMLInputElement>(null);
@@ -50,7 +56,27 @@ const Upload: FC<UploadProps> = props => {
 
     uploadFiles(files);
   };
+  const [filelist, setFilelist] = useState<Array<UploadFile>>([])
 
+  const updateFileList = (updateFile: UploadFile, updateobj: Partial<UploadFile>) => {
+    setFilelist(prevList => {
+      return prevList.map(file => {
+        if (file.uid === updateFile.uid) {
+          return { ...file, ...updateobj }
+        } else {
+          return file
+        }
+      })
+    })
+  }
+  const handleRemove = (file: UploadFile) => {
+    setFilelist(prevList => {
+      return prevList.filter(item => item.uid !== file.uid)
+    })
+    if (onRemove) {
+      onRemove(file)
+    }
+  }
   const uploadFiles = (files: FileList) => {
     const postFiles = Array.from(files);
     postFiles.forEach(file => {
@@ -72,8 +98,23 @@ const Upload: FC<UploadProps> = props => {
   };
 
   const post = (file: File) => {
+    const uploadFile: UploadFile = {
+      uid: Date.now() + 'upload-file',
+      status: 'ready',
+      name: file.name,
+      size: file.size,
+      percent: 0,
+      raw: file
+    }
+    setFilelist(prevList => {
+      return [uploadFile, ...prevList]
+    })
     const formData = new FormData();
     formData.append(name || "file", file);
+    /**
+     * 在 post 函数中，data 参数被用于将额外的数据附加到 FormData 对象中。
+     * FormData 是一种用于构建键值对的对象，通常用于在 POST 请求中发送数据。
+     */
     if (data) {
       Object.keys(data).forEach(key => {
         formData.append(key, data[key]);
@@ -91,6 +132,7 @@ const Upload: FC<UploadProps> = props => {
         onUploadProgress: e => {
           const percentage = Math.round((e.loaded * 100) / e.total!) || 0;
           if (percentage < 100) {
+            updateFileList(uploadFile, { percent: percentage, status: 'uploading' })
             if (onProgress) {
               onProgress(percentage, file);
             }
@@ -98,6 +140,7 @@ const Upload: FC<UploadProps> = props => {
         },
       })
       .then(resp => {
+        updateFileList(uploadFile, { status: 'success', response: resp.data })
         onSuccess?.(resp.data, file);
         onChange?.(file);
         if (fileInput.current) {
@@ -105,6 +148,7 @@ const Upload: FC<UploadProps> = props => {
         }
       })
       .catch(error => {
+        updateFileList(uploadFile, { status: 'error', error })
         onError?.(error, file);
         onChange?.(file);
         console.error("Upload failed:", error);
@@ -114,8 +158,11 @@ const Upload: FC<UploadProps> = props => {
   return (
     <div className="upload-component">
       <div className="upload-input" onClick={handleClick}>
-        {children}
-        <input
+        {drag ? <Dragger onFile={(files) => { uploadFiles(files) }}>
+          {children}
+        </Dragger> : children
+        }
+        < input
           className="upload-file-input"
           type="file"
           ref={fileInput}
@@ -124,6 +171,10 @@ const Upload: FC<UploadProps> = props => {
           multiple={multiple}
         />
       </div>
+      <UploadList
+        fileList={filelist}
+        onRemove={handleRemove}
+      />
     </div>
   );
 };
