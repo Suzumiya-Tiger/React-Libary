@@ -1,0 +1,59 @@
+.message-enter {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
+.message-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity, transform 1s ease;
+}
+
+.message-exit {
+  opacity: 1;
+}
+
+.message-exit-active {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.message-wrapper {
+  position: fixed; // 1. 相对于浏览器窗口定位
+  width: 100%; // 2. 宽度占满窗口
+  height: 100%; // 3. 高度占满窗口
+
+  pointer-events: none; // 允许鼠标事件穿透
+
+  display: flex; // 4. 使用 Flexbox 布局
+  flex-direction: column; // 5. 子元素垂直排列
+  // justify-content: flex-start; // 垂直方向从顶部开始 (注释掉的，根据实际代码)
+
+  &-top {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content; // 或者一个具体的宽度
+  }
+
+  &-bottom {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content; // 或者一个具体的宽度
+  }
+}
+
+.message-item {
+  margin-bottom: 12px;
+
+  padding: 10px 16px;
+  line-height: 14px;
+  font-size: 14px;
+
+  border: 1px solid #ccc;
+  box-shadow: 0 0 3px #ccc;
+
+  pointer-events: all;
+}
