@@ -1,10 +1,12 @@
 import { createContext } from "react";
 
+export type FormValue = string | number | boolean | null | undefined;
+
 export interface FormContextProps {
-  values?: Record<string, any>;
-  setValues?: (values: Record<string, any>) => void;
-  onValueChange?: (key: string, value: any) => void;
-  validateRegister?: (name: string, cb: Function) => void;
+  values?: Record<string, FormValue>;
+  setValues?: (values: Record<string, FormValue>) => void;
+  onValueChange?: (key: string, value: FormValue) => void;
+  validateRegister?: (name: string, cb: () => FormValue) => void;
 }
 
 export default createContext<FormContextProps>({});

@@ -6,14 +6,17 @@ import React, {
   ReactNode,
 } from "react";
 import classNames from "classnames";
-import FormContext from "./FormContext";
+import FormContext, { FormContextProps } from "./FormContext";
+
+// 推断出 FormValue 类型
+type FormValue = Parameters<NonNullable<FormContextProps['onValueChange']>>[1];
 
 export interface FormProps extends React.HTMLAttributes<HTMLFormElement> {
   className?: string;
   style?: CSSProperties;
-  onFinish?: (values: Record<string, any>) => void;
-  onFinishFailed?: (errors: Record<string, any>) => void;
-  initialValues?: Record<string, any>;
+  onFinish?: (values: Record<string, FormValue>) => void;
+  onFinishFailed?: (errors: Record<string, FormValue>) => void;
+  initialValues?: Record<string, FormValue>;
   children?: ReactNode;
 }
 
@@ -26,14 +29,14 @@ const Form: React.FC<FormProps> = ({
   children,
   ...others
 }) => {
-  const [values, setValues] = useState<Record<string, any>>(
+  const [values, setValues] = useState<Record<string, FormValue>>(
     initialValues || {}
   );
-  const validatorMap = useRef(new Map<string, () => void>());
+  const validatorMap = useRef(new Map<string, () => FormValue>());
 
-  const errors = useRef<Record<string, any>>({});
+  const errors = useRef<Record<string, FormValue>>({});
 
-  const onValueChange = (key: string, value: any) => {
+  const onValueChange = (key: string, value: FormValue) => {
     values[key] = value;
   };
 
@@ -45,19 +48,24 @@ const Form: React.FC<FormProps> = ({
       }
     }
 
-    const errorList = Object.keys(errors.current).map(key => {
-      return errors.current[key];
-    });
+    const errorResults = Object.values(errors.current);
+    const actualErrors = errorResults.filter(result => result !== null);
 
-    if (errorList.length > 0) {
-      onFinishFailed?.(errors.current);
+    if (actualErrors.length > 0) {
+      const errorFields = Object.entries(errors.current)
+        .filter(([key, value]) => value !== null)
+        .reduce((acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        }, {} as Record<string, FormValue>);
+      onFinishFailed?.(errorFields);
       return;
     }
 
     onFinish?.(values);
   };
 
-  const handleValidateRegister = (name: string, cb: () => void) => {
+  const handleValidateRegister = (name: string, cb: () => FormValue) => {
     validatorMap.current.set(name, cb);
   };
 
@@ -77,3 +85,5 @@ const Form: React.FC<FormProps> = ({
     </FormContext.Provider>
   );
 };
+
+export default Form;
