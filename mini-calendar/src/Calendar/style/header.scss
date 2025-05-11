@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .calendar-header {
+    @apply mt-4 ml-4 font-primary;
+    .calendar-header-left {
+      @apply flex items-center h-7 leading-7;
+    }
+    .calendar-header-value {
+      @apply text-xl;
+    }
+    .calendar-header-btn {
+      @apply bg-[#eee] cursor-pointer border-0 px-[15px] leading-[28px] rounded-md text-[#333];
+    }
+    .calendar-header-btn:hover {
+      @apply bg-[#ccc];
+    }
+
+    &-icon {
+      @apply text-xs w-7 h-7 leading-7 text-center rounded-full select-none cursor-pointer mr-3;
+      &:not(:first-child) {
+        @apply mx-3;
+      }
+
+      &:hover {
+        @apply bg-[#ccc];
+      }
+    }
+  }
+}

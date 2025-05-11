@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .calendar-month-week-list {
+    @apply flex p-0 w-full box-border border-b border-gray-200;
+  }
+  .calendar-month-week-list-item {
+    @apply py-5 px-4 text-left text-gray-500 flex-1;
+  }
+
+  .calendar-month-body-row {
+    @apply h-[100px] flex;
+  }
+  .calendar-month-body-cell {
+    @apply flex-1 border-b border-gray-200 p-2.5 text-custom-gray overflow-hidden;
+  }
+  .calendar-month-body-cell-current {
+    @apply text-custom-black;
+  }
+  .calendar-month-body-cell-date {
+    @apply p-2.5;
+  }
+  .calendar-month-body-cell-date-selected {
+    @apply bg-blue-700 w-7 h-7 leading-7 text-white rounded-full text-center cursor-pointer;
+  }
+}
